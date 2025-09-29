@@ -1,0 +1,37 @@
+<div class="topbar-item">
+  <div ngbDropdown class="dropdown">
+    <button ngbDropdownToggle class="topbar-link btn fw-medium btn-link dropdown-toggle drop-arrow-none">
+      <lucide-angular [img]="LucideLayers2" class="fs-16 me-1"/>
+      Mega Menu
+      <ng-icon name="tablerChevronDown" class="ms-1"/>
+    </button>
+    <div ngbDropdownMenu class="dropdown-menu dropdown-menu-xxl p-0">
+      <div class="h-100" style="max-height: 380px;" data-simplebar>
+        <div class="row g-0">
+          <div class="col-12">
+            <div class="px-3 py-2 text-center bg-light bg-opacity-50">
+              <h4 class="mb-0 fs-lg fw-semibold">Welcome to <span
+                class="text-primary">OFICINA+</span> Admin Theme.</h4>
+            </div>
+          </div>
+        </div>
+        <div class="row g-0">
+          @for (item of megaMenuItems; track i;let i = $index) {
+            <div  class="col-md-4">
+              <div class="p-3">
+                <h5 class="fw-semibold fs-sm dropdown-header">{{ item.title }}</h5>
+                <ul class="list-unstyled megamenu-list">
+                  @for (link of item.links; track i;let i = $index) {
+                    <li >
+                      <a [routerLink]="link.url" class="dropdown-item">{{ link.label }}</a>
+                    </li>
+                  }
+                </ul>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,38 @@
+<div class="topbar-item">
+  <div ngbDropdown placement="bottom-right" class="dropdown">
+    <button
+      class="topbar-link fw-semibold drop-arrow-none"
+      ngbDropdownToggle
+      type="button"
+    >
+      <img
+        [src]="selectedLang.flag"
+        alt="user-image"
+        class="w-100 rounded me-2"
+        height="18"
+        id="selected-language-image"
+      />
+      <span id="selected-language-code">
+        {{ selectedLang.code.toUpperCase() }}</span
+      >
+    </button>
+    <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end">
+      @for (language of languages; track i; let i = $index) {
+      <a
+        class="dropdown-item"
+        role="button"
+        (click)="changeLanguage(language.code)"
+        [attr.title]="language.name"
+      >
+        <img
+          [src]="language.flag"
+          alt="English"
+          class="me-1 rounded"
+          height="18"
+        />
+        <span class="align-middle">{{ language.nativeName }}</span>
+      </a>
+      }
+    </div>
+  </div>
+</div>

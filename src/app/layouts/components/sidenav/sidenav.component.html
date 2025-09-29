@@ -1,0 +1,11 @@
+<div class="sidenav-menu">
+  <ngx-simplebar id="sidenav" class="scrollbar">
+    <!-- User -->
+    @if (layout.sidenavUser) {
+      <app-user-profile />
+    }
+
+    <!--- Sidenav Menu -->
+    <app-menu />
+  </ngx-simplebar>
+</div>

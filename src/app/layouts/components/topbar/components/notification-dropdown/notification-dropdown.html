@@ -1,0 +1,90 @@
+<div class="topbar-item">
+  <div ngbDropdown>
+    <button
+      class="topbar-link dropdown-toggle drop-arrow-none"
+      ngbDropdownToggle
+      type="button"
+    >
+      <lucide-angular [img]="LucideBell" class="fs-xxl"/>
+      <span class="badge badge-square text-bg-success topbar-badge"
+      >{{ notifications.length }}</span
+      >
+    </button>
+
+    <div class="dropdown-menu-lg" ngbDropdownMenu>
+      <div class="px-3 py-2 border-bottom">
+        <div class="row align-items-center">
+          <div class="col">
+            <h6 class="m-0 fs-md fw-semibold">Notifications</h6>
+          </div>
+          <div class="col text-end">
+            <span class="badge text-bg-light badge-label py-1">
+              {{ notifications.length }} Alerts
+            </span>
+          </div>
+        </div>
+      </div>
+      <ngx-simplebar style="max-height: 300px; overflow: auto">
+        @for (notification of notifications; track notification.id) {
+          <button
+            class="dropdown-item notification-item py-2 text-wrap"
+            type="button"
+          >
+          <span class="d-flex gap-2">
+            @if (notification.avatar) {
+              <span class="flex-shrink-0">
+              <img
+                [src]="notification.avatar"
+                class="avatar-md rounded-circle"
+                alt="User Avatar"
+                width="36"
+                height="36"
+              />
+            </span>
+            }
+            @if (notification.icon) {
+              <span class="avatar-md flex-shrink-0">
+              <span
+                class="avatar-title bg-primary-subtle text-primary rounded-circle fs-22"
+              >
+                <lucide-angular [img]="notification.icon" class="fs-md"/>
+              </span>
+            </span>
+            }
+            <span class="flex-grow-1 text-muted">
+              @if (notification.type === 'message') {
+                <span class="fw-medium text-body">{{ notification.title }}</span>
+                {{ notification.description }}
+              } @else {
+                <span class="fw-medium text-body">
+                {{
+                    notification.title ? notification.title :
+                      notification.description
+                  }}
+              </span>
+              }
+              <br/>
+              <span class="fs-xs">{{ notification.time }}</span>
+            </span>
+            <button
+              type="button"
+              class="flex-shrink-0 text-muted btn shadow-none btn-link p-0"
+            >
+              <lucide-angular [img]="LucideCircleX" class="fs-xxl"/>
+            </button>
+          </span>
+          </button>
+        }
+        @if (notifications.length === 0) {
+          <div class="text-center py-4 text-muted">No notifications</div>
+        }
+      </ngx-simplebar>
+      <a
+        href="javascript:void(0);"
+        class="dropdown-item text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2"
+      >
+        View All Notifications
+      </a>
+    </div>
+  </div>
+</div>
