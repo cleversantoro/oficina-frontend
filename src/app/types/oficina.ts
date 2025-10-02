@@ -4,7 +4,7 @@ export type Cliente = {
   documento?: string
   telefone?: string
   email?: string
-  createdAt?: string
+  created_At?: string
 }
 
 export type Mecanico = {
@@ -15,7 +15,7 @@ export type Mecanico = {
 
 export type Fornecedor = {
   id?: string
-  razaoSocial?: string
+  razao_Social?: string
   cnpj?: string
   contato?: string
 }
@@ -24,17 +24,16 @@ export type Peca = {
   id?: string
   codigo?: string
   descricao?: string
-  precoUnitario?: number
+  preco_Unitario?: number
   quantidade?: number
-  fornecedorId?: string
+  fornecedor_Id?: string
 }
 
 export type OrdemServico = {
   id?: string
-  clienteId?: string
-  mecanicoId?: string
-  descricaoProblema?: string
+  cliente_Id?: string
+  mecanico_Id?: string
+  descricao_Problema?: string
   status?: string
-  criadaEm?: string
-  createdAt?: string
+  created_At?: string
 }

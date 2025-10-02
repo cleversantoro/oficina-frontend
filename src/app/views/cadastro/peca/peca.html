@@ -33,9 +33,9 @@
                 <td>{{ peca.descricao || '—' }}</td>
                 <td class="text-end">{{ peca.quantidade ?? '—' }}</td>
                 <td class="text-end">
-                  {{ peca.precoUnitario !== undefined ? (peca.precoUnitario | number: '1.2-2') : '—' }}
+                  {{ peca.preco_Unitario !== undefined ? (peca.preco_Unitario | number: '1.2-2') : '—' }}
                 </td>
-                <td>{{ peca.fornecedorId || '—' }}</td>
+                <td>{{ peca.fornecedor_Id || '—' }}</td>
               </tr>
             </tbody>
           </table>

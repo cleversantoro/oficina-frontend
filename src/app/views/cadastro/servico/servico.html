@@ -31,14 +31,14 @@
             <tbody>
               <tr *ngFor="let ordem of ordens(); trackBy: trackByOrdem">
                 <td class="fw-semibold">{{ ordem.id || '—' }}</td>
-                <td>{{ ordem.clienteId || '—' }}</td>
-                <td>{{ ordem.mecanicoId || '—' }}</td>
+                <td>{{ ordem.cliente_Id || '—' }}</td>
+                <td>{{ ordem.mecanico_Id || '—' }}</td>
                 <td class="text-wrap" style="max-width: 320px;">
-                  {{ ordem.descricaoProblema || '—' }}
+                  {{ ordem.descricao_Problema || '—' }}
                 </td>
                 <td>{{ formatStatus(ordem.status) }}</td>
                 <td>
-                  {{ ordem.criadaEm ? (ordem.criadaEm | date: 'short') : ordem.createdAt ? (ordem.createdAt | date: 'short') : '—' }}
+                  {{ ordem.created_At ? (ordem.created_At | date: 'short') : '—' }}
                 </td>
               </tr>
             </tbody>
