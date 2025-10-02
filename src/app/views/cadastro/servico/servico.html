@@ -1,1 +1,56 @@
 <app-page-title title="Serviços" subTitle="Cadastro"/>
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <ng-container *ngIf="loading(); else content">
+      <div class="py-5 text-center text-muted">Carregando ordens de serviço...</div>
+    </ng-container>
+
+    <ng-template #content>
+      <ng-container *ngIf="error(); else ordensTable">
+        <div class="alert alert-danger m-3" role="alert">
+          {{ error() }}
+        </div>
+      </ng-container>
+    </ng-template>
+
+    <ng-template #ordensTable>
+      <ng-container *ngIf="ordens().length > 0; else emptyState">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">Ordem</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Mecânico</th>
+                <th scope="col">Descrição</th>
+                <th scope="col">Status</th>
+                <th scope="col">Criada em</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let ordem of ordens(); trackBy: trackByOrdem">
+                <td class="fw-semibold">{{ ordem.id || '—' }}</td>
+                <td>{{ ordem.clienteId || '—' }}</td>
+                <td>{{ ordem.mecanicoId || '—' }}</td>
+                <td class="text-wrap" style="max-width: 320px;">
+                  {{ ordem.descricaoProblema || '—' }}
+                </td>
+                <td>{{ formatStatus(ordem.status) }}</td>
+                <td>
+                  {{ ordem.criadaEm ? (ordem.criadaEm | date: 'short') : ordem.createdAt ? (ordem.createdAt | date: 'short') : '—' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+    </ng-template>
+
+    <ng-template #emptyState>
+      <div class="py-5 text-center text-muted">
+        Nenhuma ordem de serviço cadastrada no momento.
+      </div>
+    </ng-template>
+  </div>
+</div>
