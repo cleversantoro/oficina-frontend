@@ -4,7 +4,7 @@
   documento?: string
   telefone?: string
   email?: string
-  createdAt?: string
+  created_At?: string
 }
 
 export interface Paginacao<T> {
