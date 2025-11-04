@@ -20,16 +20,18 @@
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
+                <th scope="col">Identificador</th>
                 <th scope="col">Nome</th>
                 <th scope="col">Especialidade</th>
-                <th scope="col">Identificador</th>
+                <th scope="col">Nível</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let mecanico of mecanicos(); trackBy: trackByMecanico">
-                <td class="fw-semibold">{{ mecanico.nome || '—' }}</td>
-                <td>{{ mecanico.especialidade || '—' }}</td>
-                <td>{{ mecanico.id || '—' }}</td>
+                <td>{{ mecanico.codigo || '—' }}</td>
+                <td class="fw-semibold">{{ mecanico.nomeCompleto || '—' }}</td>
+                <td>{{ mecanico.especialidadePrincipal || '—' }}</td>
+                <td>{{ mecanico.nivel || '—' }}</td>
               </tr>
             </tbody>
           </table>

@@ -1,5 +1,9 @@
 ﻿export type Mecanico = {
   id?: string
-  nome?: string
-  especialidade?: string
+  codigo?: string
+  nivel?: string
+  status?: string
+  ValorHora?: number
+  nomeCompleto?: string
+  especialidadePrincipal?: string
 }
