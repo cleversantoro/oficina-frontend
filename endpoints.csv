@@ -1,0 +1,22 @@
+Modulo,Metodo,Rota,Descricao
+Geral,GET,/health,Retorna status da aplicacao
+Geral,GET,/swagger,Interface de exploracao da API
+Cadastro,GET,/cadastro/clientes,Lista clientes com filtros por nome, status, tipo, origem e VIP
+Cadastro,GET,/cadastro/clientes/{codigo},Retorna detalhes completos do cliente (enderecos, contatos, veiculos, anexos)
+Cadastro,POST,/cadastro/clientes,Cria cliente PF ou PJ com validacoes completas
+Cadastro,PUT,/cadastro/clientes/{codigo},Atualiza dados do cliente, substituindo colecoes relacionadas
+Cadastro,DELETE,/cadastro/clientes/{codigo},Remove cliente e relacionamentos dependentes
+Cadastro,GET,/cadastro/mecanicos,Lista mecanicos com especialidades, contatos e disponibilidade
+Cadastro,POST,/cadastro/mecanicos,Cria mecanico validando codigo, documento principal e especialidades
+Cadastro,GET,/cadastro/fornecedores,Lista fornecedores ativos
+Cadastro,POST,/cadastro/fornecedores,Cadastra fornecedor com informacoes financeiras e contatos
+OrdemServico,GET,/ordens/,Lista ordens com itens associados
+OrdemServico,POST,/ordens/,Abre nova ordem de servico para cliente/mecanico
+OrdemServico,POST,/ordens/{id}/itens,Inclui item de servico/peca na ordem
+OrdemServico,PUT,/ordens/{id}/status,Atualiza status e data de conclusao
+Estoque,GET,/estoque/pecas,Lista pecas com saldo atual
+Estoque,POST,/estoque/pecas,Cadastra nova peca vinculada a fornecedor
+Estoque,POST,/estoque/movimentacoes,Lanca movimentacao de entrada ou saida ajustando o saldo
+Financeiro,POST,/financeiro/pagamentos,Processa pagamento (mock) e grava status inicial
+Financeiro,PUT,/financeiro/pagamentos/{id}/status,Ajusta status manualmente (ex.: PAGO, FALHA)
+Financeiro,POST,/financeiro/nfe,Emite NF-e (mock) com base em pagamentos aprovados da OS
