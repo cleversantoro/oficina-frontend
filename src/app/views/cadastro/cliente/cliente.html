@@ -1,4 +1,4 @@
-<app-page-title title="Clientes" subTitle="Cadastro"/>
+<app-page-title title="Clientes" subTitle="Cadastro" />
 
 <div class="card shadow-sm">
   <div class="card-body p-0">
@@ -7,38 +7,222 @@
     </ng-container>
 
     <ng-template #content>
-      <ng-container *ngIf="error(); else clientesTable">
+      <ng-container *ngIf="error(); else clientesContent">
         <div class="alert alert-danger m-3" role="alert">
           {{ error() }}
         </div>
       </ng-container>
     </ng-template>
 
-    <ng-template #clientesTable>
+    <ng-template #clientesContent>
       <ng-container *ngIf="clientes().length > 0; else emptyState">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th scope="col">Nome</th>
-                <th scope="col">Documento</th>
-                <th scope="col">Telefone</th>
-                <th scope="col">E-mail</th>
-                <th scope="col">Criado em</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let cliente of clientes(); trackBy: trackByCliente">
-                <td class="fw-semibold">{{ cliente.nome || '—' }}</td>
-                <td>{{ cliente.documento || '—' }}</td>
-                <td>{{ cliente.telefone || '—' }}</td>
-                <td>{{ cliente.email || '—' }}</td>
-                <td>
-                  {{ cliente.created_At ? (cliente.created_At | date: 'short') : '—' }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <section class="clientes-resumo border-bottom">
+          <div class="row g-3">
+            <div class="col-6 col-lg-3 col-xxl-2" *ngFor="let card of resumoCards(); trackBy: trackResumoCard">
+              <div class="resumo-card">
+                <p class="resumo-card__label">{{ card.label }}</p>
+                <p class="resumo-card__value">{{ card.value }}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="clientes-list">
+          <article class="cliente-card" *ngFor="let cliente of clientes(); trackBy: trackByCliente">
+            <header class="cliente-card__header">
+              <div>
+                <div class="cliente-card__codigo">#{{ getCodigo(cliente) }}</div>
+                <h2 class="cliente-card__title">{{ getNome(cliente) }}</h2>
+                <p class="cliente-card__meta">
+                  Documento:
+                  <span>{{ getDocumento(cliente) }}</span>
+                </p>
+              </div>
+              <div class="cliente-card__badges text-end">
+                <span [ngClass]="getStatusBadgeClass(cliente)">{{ getStatusLabel(cliente) }}</span>
+                <span *ngIf="isVip(cliente)" class="badge text-bg-warning-subtle ms-2">VIP</span>
+              </div>
+            </header>
+
+            <div class="cliente-card__body">
+              <div class="row g-4">
+                <div class="col-12 col-lg-4">
+                  <h6 class="cliente-section__title">Dados gerais</h6>
+                  <dl class="cliente-dl">
+                    <div>
+                      <dt>Tipo</dt>
+                      <dd>{{ getPessoaTipo(cliente) || 'Nao informado' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Origem</dt>
+                      <dd>{{ getOrigem(cliente) }}</dd>
+                    </div>
+                    <div>
+                      <dt>Cadastrado em</dt>
+                      <dd>{{ getCreatedAt(cliente) ? (getCreatedAt(cliente)! | date: 'short') : '--' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Atualizado em</dt>
+                      <dd>{{ getUpdatedAt(cliente) ? (getUpdatedAt(cliente)! | date: 'short') : '--' }}</dd>
+                    </div>
+                  </dl>
+                  <p class="cliente-card__observacao">
+                    {{ getObservacoes(cliente) }}
+                  </p>
+                </div>
+
+                <div class="col-12 col-lg-4">
+                  <h6 class="cliente-section__title">Contatos</h6>
+                  <ng-container *ngIf="cliente.contatos?.length; else contatoVazio">
+                    <ul class="cliente-list">
+                      <li *ngFor="let contato of getContatoOrdenado(cliente)">
+                        <span class="badge bg-light text-dark me-2">{{ contato.tipo || 'Contato' }}</span>
+                        <span>{{ contato.valor || contato.email_lower || '--' }}</span>
+                        <span *ngIf="contato.preferido" class="text-success ms-2">Preferencial</span>
+                      </li>
+                    </ul>
+                  </ng-container>
+                  <ng-template #contatoVazio>
+                    <p class="text-muted small mb-0">Nenhum contato cadastrado.</p>
+                  </ng-template>
+                </div>
+
+                <div class="col-12 col-lg-4">
+                  <h6 class="cliente-section__title">Endereco principal</h6>
+                  <ng-container *ngIf="getEnderecoPrincipal(cliente) as endereco; else enderecoVazio">
+                    <p class="mb-1 fw-semibold">
+                      {{ endereco.tipo || 'Endereco' }}
+                      <span *ngIf="endereco.principal" class="badge text-bg-primary-subtle ms-2">Principal</span>
+                    </p>
+                    <p class="mb-1 text-body-secondary">
+                      {{ endereco.logradouro }}, {{ endereco.numero }} - {{ endereco.bairro }}
+                    </p>
+                    <p class="mb-1 text-body-secondary">
+                      {{ endereco.cidade }}/{{ endereco.uf }} - {{ endereco.cep }}
+                    </p>
+                    <p class="mb-0 text-body-secondary">
+                      {{ endereco.pais || 'Brasil' }}
+                    </p>
+                  </ng-container>
+                  <ng-template #enderecoVazio>
+                    <p class="text-muted small mb-0">Nenhum endereco cadastrado.</p>
+                  </ng-template>
+                </div>
+              </div>
+
+              <div class="row g-4 mt-1">
+                <div class="col-12 col-xl-4">
+                  <h6 class="cliente-section__title">Financeiro</h6>
+                  <ng-container *ngIf="hasFinanceiro(cliente); else financeiroVazio">
+                    <dl class="cliente-dl cliente-dl--compact">
+                      <div>
+                        <dt>Limite de credito</dt>
+                        <dd>
+                          {{
+                            cliente.financeiro?.limite_credito !== null && cliente.financeiro?.limite_credito !== undefined
+                              ? (cliente.financeiro?.limite_credito | currency: 'BRL':'symbol-narrow':'1.2-2')
+                              : '--'
+                          }}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Saldo em aberto</dt>
+                        <dd>
+                          {{
+                            cliente.financeiro?.saldo_em_aberto !== null && cliente.financeiro?.saldo_em_aberto !== undefined
+                              ? (cliente.financeiro?.saldo_em_aberto | currency: 'BRL':'symbol-narrow':'1.2-2')
+                              : '--'
+                          }}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Condicao pagamento</dt>
+                        <dd>{{ cliente.financeiro?.condicao_pagamento || '--' }}</dd>
+                      </div>
+                      <div>
+                        <dt>Meio preferido</dt>
+                        <dd>{{ cliente.financeiro?.meio_pagto_preferido || '--' }}</dd>
+                      </div>
+                      <div>
+                        <dt>Risco</dt>
+                        <dd>{{ cliente.financeiro?.risco_score ?? '--' }}</dd>
+                      </div>
+                      <div>
+                        <dt>Bloqueio</dt>
+                        <dd>{{ cliente.financeiro?.possui_bloqueio ? 'Sim' : 'Nao' }}</dd>
+                      </div>
+                    </dl>
+                  </ng-container>
+                  <ng-template #financeiroVazio>
+                    <p class="text-muted small mb-0">Sem informacoes financeiras.</p>
+                  </ng-template>
+                </div>
+
+                <div class="col-12 col-xl-4">
+                  <h6 class="cliente-section__title">Documentos</h6>
+                  <ng-container *ngIf="hasDocumentos(cliente); else documentosVazio">
+                    <ul class="cliente-list">
+                      <li *ngFor="let documento of cliente.documentos">
+                        <span class="fw-semibold">{{ documento.tipo }}</span>
+                        <span class="ms-1">- {{ documento.numero || '--' }}</span>
+                        <small class="text-body-secondary d-block">
+                          {{ documento.orgao_expedidor || 'Orgao nao informado' }}
+                          <span *ngIf="documento.data_validade">
+                            | validade: {{ documento.data_validade | date: 'shortDate' }}
+                          </span>
+                        </small>
+                      </li>
+                    </ul>
+                  </ng-container>
+                  <ng-template #documentosVazio>
+                    <p class="text-muted small mb-0">Nenhum documento adicional.</p>
+                  </ng-template>
+                </div>
+
+                <div class="col-12 col-xl-4">
+                  <h6 class="cliente-section__title">LGPD e anexos</h6>
+                  <div class="cliente-lgpd">
+                    <strong>Consentimentos</strong>
+                    <ng-container *ngIf="hasLgpd(cliente); else lgpdVazio">
+                      <ul class="cliente-list cliente-list--compact">
+                        <li *ngFor="let consentimento of getConsentimentos(cliente)">
+                          <span class="fw-semibold">{{ consentimento.tipo }}</span>
+                          <span
+                            class="ms-2 badge"
+                            [ngClass]="consentimento.consentido ? 'text-bg-success-subtle' : 'text-bg-danger-subtle'"
+                          >
+                            {{ consentimento.consentido ? 'Aceito' : 'Negado' }}
+                          </span>
+                          <small class="text-body-secondary d-block">
+                            {{ consentimento.fonte }} - {{ consentimento.ocorrido_em | date: 'short' }}
+                          </small>
+                        </li>
+                      </ul>
+                    </ng-container>
+                    <ng-template #lgpdVazio>
+                      <p class="text-muted small mb-3">Sem consentimentos registrados.</p>
+                    </ng-template>
+                  </div>
+                  <div class="cliente-anexos mt-3">
+                    <strong>Arquivos</strong>
+                    <ng-container *ngIf="hasAnexos(cliente); else anexosVazio">
+                      <ul class="cliente-list cliente-list--compact">
+                        <li *ngFor="let anexo of cliente.anexos">
+                          <span class="fw-semibold">{{ anexo.tipo }}</span>
+                          <small class="text-body-secondary d-block">
+                            {{ anexo.nome_arquivo }} - {{ anexo.content_type }}
+                          </small>
+                        </li>
+                      </ul>
+                    </ng-container>
+                    <ng-template #anexosVazio>
+                      <p class="text-muted small mb-0">Nenhum arquivo enviado.</p>
+                    </ng-template>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
       </ng-container>
     </ng-template>

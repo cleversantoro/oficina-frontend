@@ -1,7 +1,7 @@
 <app-page-title title="Veiculos" subTitle="Cadastro" />
 
 <div class="row g-3 mb-4">
-  @for (card of resumo(); track trackResumo) {
+  @for (card of resumo(); track trackResumo($index, card)) {
     <div class="col-6 col-md-3">
       <div class="resumo-card">
         <span class="label text-muted text-uppercase">{{ card.label }}</span>
@@ -59,7 +59,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (veiculo of veiculos(); track trackByVeiculo) {
+              @for (veiculo of veiculos(); track trackByVeiculo($index, veiculo)) {
                 <tr>
                   <td class="fw-semibold text-uppercase">{{ veiculo.placa }}</td>
                   <td>#{{ veiculo.cliente_id }}</td>
@@ -110,8 +110,7 @@
 </div>
 
 @if (modalOpen()) {
-  <div class="modal-backdrop fade show" (click)="cancelEdicao()"></div>
-  <div class="modal-wrapper">
+  <div class="modal-wrapper" (click)="cancelEdicao()">
     <div class="modal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div>

@@ -14,3 +14,5 @@ export interface VeVeiculo {
   km_atual: number | null
   ativo: boolean
 }
+
+export type SaveVeiculoPayload = Omit<VeVeiculo, 'id'> & { id?: number }

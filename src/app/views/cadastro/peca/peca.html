@@ -1,9 +1,9 @@
-<app-page-title title="Peças" subTitle="Cadastro"/>
+<app-page-title title="Pecas" subTitle="Cadastro" />
 
 <div class="card shadow-sm">
   <div class="card-body p-0">
     <ng-container *ngIf="loading(); else content">
-      <div class="py-5 text-center text-muted">Carregando peças...</div>
+      <div class="py-5 text-center text-muted">Carregando pecas...</div>
     </ng-container>
 
     <ng-template #content>
@@ -20,22 +20,94 @@
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
-                <th scope="col">Código</th>
-                <th scope="col">Descrição</th>
+                <th scope="col">Codigo</th>
+                <th scope="col" style="min-width: 220px">Descricao</th>
                 <th scope="col" class="text-end">Estoque</th>
-                <th scope="col" class="text-end">Preço unitário</th>
-                <th scope="col">Fornecedor</th>
+                <th scope="col">Unidade</th>
+                <th scope="col" class="text-end">Preco unitario</th>
+                <th scope="col">Status</th>
+                <th scope="col">Fabricante / Categoria</th>
+                <th scope="col">Localizacao</th>
+                <th scope="col" style="min-width: 220px">Fornecedores</th>
+                <th scope="col" style="min-width: 200px">Ultima alteracao</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let peca of pecas(); trackBy: trackByPeca">
-                <td class="fw-semibold">{{ peca.codigo || '—' }}</td>
-                <td>{{ peca.descricao || '—' }}</td>
-                <td class="text-end">{{ peca.quantidade ?? '—' }}</td>
-                <td class="text-end">
-                  {{ peca.preco_Unitario !== undefined ? (peca.preco_Unitario | number: '1.2-2') : '—' }}
+                <td class="fw-semibold">
+                  {{ peca.codigo || '--' }}
+                  <div class="text-muted small">ID: {{ peca.peca_Id ?? '--' }}</div>
                 </td>
-                <td>{{ peca.fornecedor_Id || '—' }}</td>
+                <td>
+                  <div class="fw-semibold">{{ peca.descricao || '--' }}</div>
+                  <div class="text-muted small" *ngIf="peca.observacoes">
+                    {{ peca.observacoes }}
+                  </div>
+                  <ng-container *ngIf="peca.anexos?.length as totalAnexos">
+                    <div class="text-muted small">
+                      {{ totalAnexos }}
+                      {{ totalAnexos === 1 ? 'anexo disponivel' : 'anexos disponiveis' }}
+                    </div>
+                  </ng-container>
+                </td>
+                <td class="text-end">
+                  <div>{{ peca.quantidade ?? '--' }}</div>
+                  <div class="text-muted small">
+                    min {{ peca.estoqueMinimo ?? '--' }} / max {{ peca.estoqueMaximo ?? '--' }}
+                  </div>
+                </td>
+                <td>{{ peca.unidade || '--' }}</td>
+                <td class="text-end">
+                  {{ peca.precoUnitario !== undefined ? (peca.precoUnitario | number: '1.2-2') : '--' }}
+                </td>
+                <td>
+                  <span
+                    class="badge rounded-pill"
+                    [ngClass]="peca.status === 'Ativo' ? 'text-bg-success' : 'text-bg-secondary'"
+                  >
+                    {{ peca.status || 'Indefinido' }}
+                  </span>
+                </td>
+                <td>
+                  <div>Fab. {{ peca.fabricanteId ?? '--' }}</div>
+                  <div class="text-muted small">Cat. {{ peca.categoriaId ?? '--' }}</div>
+                </td>
+                <td>{{ peca.localizacaoId ?? '--' }}</td>
+                <td>
+                  <ng-container *ngIf="peca.fornecedores?.length; else semFornecedor">
+                    <div class="mb-2" *ngFor="let fornecedor of peca.fornecedores">
+                      <div class="fw-semibold">Fornecedor #{{ fornecedor.fornecedorId }}</div>
+                      <div class="text-muted small">
+                        {{ fornecedor.preco !== undefined ? (fornecedor.preco | number: '1.2-2') : '--' }}
+                        /
+                        {{ fornecedor.prazoEntrega !== undefined ? (fornecedor.prazoEntrega + ' dias') : 'prazo n/d' }}
+                      </div>
+                      <div class="text-muted small" *ngIf="fornecedor.observacao">
+                        {{ fornecedor.observacao }}
+                      </div>
+                    </div>
+                  </ng-container>
+                  <ng-template #semFornecedor>
+                    <span class="text-muted">Nao vinculado</span>
+                  </ng-template>
+                </td>
+                <td>
+                  <ng-container *ngIf="peca.ultimoHistorico as historico; else semHistorico">
+                    <div class="fw-semibold">{{ historico.usuario }}</div>
+                    <div class="text-muted small">
+                      {{ historico.dataAlteracao | date: 'short' }}
+                    </div>
+                    <div class="text-muted small">
+                      {{ historico.campo }}:
+                      {{ historico.valorAntigo || '--' }}
+                      ->
+                      {{ historico.valorNovo || '--' }}
+                    </div>
+                  </ng-container>
+                  <ng-template #semHistorico>
+                    <span class="text-muted">Sem historico</span>
+                  </ng-template>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -45,7 +117,7 @@
 
     <ng-template #emptyState>
       <div class="py-5 text-center text-muted">
-        Nenhuma peça cadastrada no momento.
+        Nenhuma peca cadastrada no momento.
       </div>
     </ng-template>
   </div>

@@ -95,6 +95,7 @@ export const menuItems: MenuItemType[] = [
       { label: 'Profissionais', url: '/profissional' },
       { label: 'Serviços', url: '/servico' },
       { label: 'Peça', url: '/peca' },
+      { label: 'Veiculos', url: '/veiculo' },
     ]
   },
   // {
