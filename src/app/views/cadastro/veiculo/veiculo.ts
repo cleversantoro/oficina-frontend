@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms'
 import { PageTitle } from '@app/components/page-title'
 import { OficinaApiService } from '@core/services/oficina-api.service'
-import { SaveVeiculoPayload, VeVeiculo } from '@/app/types/oficina/ve-veiculos'
+import { SaveVeiculoPayload, VeVeiculo } from '@/app/types/oficina/'
 
 type SubmitMode = 'create' | 'update'
 
