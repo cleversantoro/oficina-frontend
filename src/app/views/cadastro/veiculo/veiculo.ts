@@ -94,8 +94,19 @@ export class Veiculo {
     const selected = this.selected()
     const mode: SubmitMode = selected ? 'update' : 'create'
 
+    let request$: ReturnType<OficinaApiService['createVeiculo']>
+    if (selected) {
+      const selectedId = selected.id
+      if (typeof selectedId !== 'number') {
+        this.error.set('Identificador do veiculo indisponível para atualização.')
+        return
+      }
+      request$ = this.api.updateVeiculo(selectedId, payload)
+    } else {
+      request$ = this.api.createVeiculo(payload)
+    }
+
     this.saving.set(true)
-    const request$ = selected ? this.api.updateVeiculo(selected.id, payload) : this.api.createVeiculo(payload)
 
     request$.pipe(takeUntilDestroyed()).subscribe({
       next: (veiculo) => {

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { Observable, map } from 'rxjs'
 import { Cliente, Fornecedor, Mecanico, OrdemServico, Peca } from '@/app/types/oficina'
-import { SaveVeiculoPayload, VeVeiculo } from '@/app/types/oficina/ve-veiculos'
+import { SaveVeiculoPayload, VeVeiculo } from '@/app/types/oficina/veiculo.type'
 
 const API_BASE_URL = 'http://localhost:5134'
 
@@ -71,7 +71,7 @@ export class OficinaApiService {
     return this.http.put<VeVeiculo>(`${API_BASE_URL}/cadastro/veiculos/${id}`, payload)
   }
 
-  deleteVeiculo(id: number): Observable<void> {
+  deleteVeiculo(id?: number): Observable<void> {
     return this.http.delete<void>(`${API_BASE_URL}/cadastro/veiculos/${id}`)
   }
 }

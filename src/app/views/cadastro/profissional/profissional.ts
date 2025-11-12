@@ -38,5 +38,5 @@ export class Profissional {
   }
 
   protected trackByMecanico = (_: number, mecanico: Mecanico): string =>
-    mecanico.id ?? mecanico.nomeCompleto ?? `${_}`
+    String(mecanico.id ?? mecanico.nome_completo ?? _)
 }

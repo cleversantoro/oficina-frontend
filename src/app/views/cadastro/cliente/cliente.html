@@ -1,236 +1,422 @@
 <app-page-title title="Clientes" subTitle="Cadastro" />
 
-<div class="card shadow-sm">
-  <div class="card-body p-0">
-    <ng-container *ngIf="loading(); else content">
-      <div class="py-5 text-center text-muted">Carregando clientes...</div>
-    </ng-container>
-
-    <ng-template #content>
-      <ng-container *ngIf="error(); else clientesContent">
-        <div class="alert alert-danger m-3" role="alert">
-          {{ error() }}
+<div class="clientes-view">
+  @if (viewMode() === 'list') {
+    <section class="card shadow-sm clientes-card">
+      <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+          <h5 class="mb-1">Clientes</h5>
+          <small class="text-muted">Gerencie cadastros, aplique filtros e exporte dados.</small>
         </div>
-      </ng-container>
-    </ng-template>
+        <div class="clientes-card__actions d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-primary" (click)="openCreateForm()">Novo cliente</button>
+          <button type="button" class="btn btn-outline-secondary" (click)="exportarClientes()">Exportar</button>
+          <button type="button" class="btn btn-outline-secondary" (click)="gerenciarColunas()">Colunas</button>
+        </div>
+      </div>
 
-    <ng-template #clientesContent>
-      <ng-container *ngIf="clientes().length > 0; else emptyState">
-        <section class="clientes-resumo border-bottom">
-          <div class="row g-3">
-            <div class="col-6 col-lg-3 col-xxl-2" *ngFor="let card of resumoCards(); trackBy: trackResumoCard">
-              <div class="resumo-card">
-                <p class="resumo-card__label">{{ card.label }}</p>
-                <p class="resumo-card__value">{{ card.value }}</p>
-              </div>
+      <div class="card-body">
+        <div class="clientes-toolbar d-flex flex-wrap gap-3 align-items-center mb-3">
+          <div class="clientes-search input-group">
+            <span class="input-group-text clientes-search__icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+                <line x1="16.65" y1="16.65" x2="22" y2="22" stroke="currentColor" stroke-width="2" />
+              </svg>
+            </span>
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Buscar por nome, documento, telefone..."
+              [value]="searchTerm()"
+              (input)="handleSearchInput($event)"
+            />
+            @if (searchTerm()) {
+              <button type="button" class="btn btn-link clientes-search__clear" (click)="clearSearch()">Limpar</button>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary clientes-toolbar__filter"
+            (click)="toggleFiltros()"
+            [attr.aria-expanded]="filtrosAbertos()"
+          >
+            Filtros
+            <span class="ms-1" aria-hidden="true">&rsaquo;</span>
+          </button>
+        </div>
+
+        @if (filtrosAbertos()) {
+          <div class="clientes-filter-panel border rounded-3 p-3 mb-3">
+            <div class="text-muted small">
+              Area reservada para filtros detalhados (origem, status, tags, etc).
             </div>
           </div>
-        </section>
+        }
 
-        <div class="clientes-list">
-          <article class="cliente-card" *ngFor="let cliente of clientes(); trackBy: trackByCliente">
-            <header class="cliente-card__header">
-              <div>
-                <div class="cliente-card__codigo">#{{ getCodigo(cliente) }}</div>
-                <h2 class="cliente-card__title">{{ getNome(cliente) }}</h2>
-                <p class="cliente-card__meta">
-                  Documento:
-                  <span>{{ getDocumento(cliente) }}</span>
-                </p>
-              </div>
-              <div class="cliente-card__badges text-end">
-                <span [ngClass]="getStatusBadgeClass(cliente)">{{ getStatusLabel(cliente) }}</span>
-                <span *ngIf="isVip(cliente)" class="badge text-bg-warning-subtle ms-2">VIP</span>
-              </div>
-            </header>
-
-            <div class="cliente-card__body">
-              <div class="row g-4">
-                <div class="col-12 col-lg-4">
-                  <h6 class="cliente-section__title">Dados gerais</h6>
-                  <dl class="cliente-dl">
-                    <div>
-                      <dt>Tipo</dt>
-                      <dd>{{ getPessoaTipo(cliente) || 'Nao informado' }}</dd>
-                    </div>
-                    <div>
-                      <dt>Origem</dt>
-                      <dd>{{ getOrigem(cliente) }}</dd>
-                    </div>
-                    <div>
-                      <dt>Cadastrado em</dt>
-                      <dd>{{ getCreatedAt(cliente) ? (getCreatedAt(cliente)! | date: 'short') : '--' }}</dd>
-                    </div>
-                    <div>
-                      <dt>Atualizado em</dt>
-                      <dd>{{ getUpdatedAt(cliente) ? (getUpdatedAt(cliente)! | date: 'short') : '--' }}</dd>
-                    </div>
-                  </dl>
-                  <p class="cliente-card__observacao">
-                    {{ getObservacoes(cliente) }}
-                  </p>
-                </div>
-
-                <div class="col-12 col-lg-4">
-                  <h6 class="cliente-section__title">Contatos</h6>
-                  <ng-container *ngIf="cliente.contatos?.length; else contatoVazio">
-                    <ul class="cliente-list">
-                      <li *ngFor="let contato of getContatoOrdenado(cliente)">
-                        <span class="badge bg-light text-dark me-2">{{ contato.tipo || 'Contato' }}</span>
-                        <span>{{ contato.valor || contato.email_lower || '--' }}</span>
-                        <span *ngIf="contato.preferido" class="text-success ms-2">Preferencial</span>
-                      </li>
-                    </ul>
-                  </ng-container>
-                  <ng-template #contatoVazio>
-                    <p class="text-muted small mb-0">Nenhum contato cadastrado.</p>
-                  </ng-template>
-                </div>
-
-                <div class="col-12 col-lg-4">
-                  <h6 class="cliente-section__title">Endereco principal</h6>
-                  <ng-container *ngIf="getEnderecoPrincipal(cliente) as endereco; else enderecoVazio">
-                    <p class="mb-1 fw-semibold">
-                      {{ endereco.tipo || 'Endereco' }}
-                      <span *ngIf="endereco.principal" class="badge text-bg-primary-subtle ms-2">Principal</span>
-                    </p>
-                    <p class="mb-1 text-body-secondary">
-                      {{ endereco.logradouro }}, {{ endereco.numero }} - {{ endereco.bairro }}
-                    </p>
-                    <p class="mb-1 text-body-secondary">
-                      {{ endereco.cidade }}/{{ endereco.uf }} - {{ endereco.cep }}
-                    </p>
-                    <p class="mb-0 text-body-secondary">
-                      {{ endereco.pais || 'Brasil' }}
-                    </p>
-                  </ng-container>
-                  <ng-template #enderecoVazio>
-                    <p class="text-muted small mb-0">Nenhum endereco cadastrado.</p>
-                  </ng-template>
-                </div>
-              </div>
-
-              <div class="row g-4 mt-1">
-                <div class="col-12 col-xl-4">
-                  <h6 class="cliente-section__title">Financeiro</h6>
-                  <ng-container *ngIf="hasFinanceiro(cliente); else financeiroVazio">
-                    <dl class="cliente-dl cliente-dl--compact">
-                      <div>
-                        <dt>Limite de credito</dt>
-                        <dd>
-                          {{
-                            cliente.financeiro?.limite_credito !== null && cliente.financeiro?.limite_credito !== undefined
-                              ? (cliente.financeiro?.limite_credito | currency: 'BRL':'symbol-narrow':'1.2-2')
-                              : '--'
-                          }}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Saldo em aberto</dt>
-                        <dd>
-                          {{
-                            cliente.financeiro?.saldo_em_aberto !== null && cliente.financeiro?.saldo_em_aberto !== undefined
-                              ? (cliente.financeiro?.saldo_em_aberto | currency: 'BRL':'symbol-narrow':'1.2-2')
-                              : '--'
-                          }}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Condicao pagamento</dt>
-                        <dd>{{ cliente.financeiro?.condicao_pagamento || '--' }}</dd>
-                      </div>
-                      <div>
-                        <dt>Meio preferido</dt>
-                        <dd>{{ cliente.financeiro?.meio_pagto_preferido || '--' }}</dd>
-                      </div>
-                      <div>
-                        <dt>Risco</dt>
-                        <dd>{{ cliente.financeiro?.risco_score ?? '--' }}</dd>
-                      </div>
-                      <div>
-                        <dt>Bloqueio</dt>
-                        <dd>{{ cliente.financeiro?.possui_bloqueio ? 'Sim' : 'Nao' }}</dd>
-                      </div>
-                    </dl>
-                  </ng-container>
-                  <ng-template #financeiroVazio>
-                    <p class="text-muted small mb-0">Sem informacoes financeiras.</p>
-                  </ng-template>
-                </div>
-
-                <div class="col-12 col-xl-4">
-                  <h6 class="cliente-section__title">Documentos</h6>
-                  <ng-container *ngIf="hasDocumentos(cliente); else documentosVazio">
-                    <ul class="cliente-list">
-                      <li *ngFor="let documento of cliente.documentos">
-                        <span class="fw-semibold">{{ documento.tipo }}</span>
-                        <span class="ms-1">- {{ documento.numero || '--' }}</span>
-                        <small class="text-body-secondary d-block">
-                          {{ documento.orgao_expedidor || 'Orgao nao informado' }}
-                          <span *ngIf="documento.data_validade">
-                            | validade: {{ documento.data_validade | date: 'shortDate' }}
-                          </span>
-                        </small>
-                      </li>
-                    </ul>
-                  </ng-container>
-                  <ng-template #documentosVazio>
-                    <p class="text-muted small mb-0">Nenhum documento adicional.</p>
-                  </ng-template>
-                </div>
-
-                <div class="col-12 col-xl-4">
-                  <h6 class="cliente-section__title">LGPD e anexos</h6>
-                  <div class="cliente-lgpd">
-                    <strong>Consentimentos</strong>
-                    <ng-container *ngIf="hasLgpd(cliente); else lgpdVazio">
-                      <ul class="cliente-list cliente-list--compact">
-                        <li *ngFor="let consentimento of getConsentimentos(cliente)">
-                          <span class="fw-semibold">{{ consentimento.tipo }}</span>
-                          <span
-                            class="ms-2 badge"
-                            [ngClass]="consentimento.consentido ? 'text-bg-success-subtle' : 'text-bg-danger-subtle'"
-                          >
-                            {{ consentimento.consentido ? 'Aceito' : 'Negado' }}
-                          </span>
-                          <small class="text-body-secondary d-block">
-                            {{ consentimento.fonte }} - {{ consentimento.ocorrido_em | date: 'short' }}
-                          </small>
-                        </li>
-                      </ul>
-                    </ng-container>
-                    <ng-template #lgpdVazio>
-                      <p class="text-muted small mb-3">Sem consentimentos registrados.</p>
-                    </ng-template>
-                  </div>
-                  <div class="cliente-anexos mt-3">
-                    <strong>Arquivos</strong>
-                    <ng-container *ngIf="hasAnexos(cliente); else anexosVazio">
-                      <ul class="cliente-list cliente-list--compact">
-                        <li *ngFor="let anexo of cliente.anexos">
-                          <span class="fw-semibold">{{ anexo.tipo }}</span>
-                          <small class="text-body-secondary d-block">
-                            {{ anexo.nome_arquivo }} - {{ anexo.content_type }}
-                          </small>
-                        </li>
-                      </ul>
-                    </ng-container>
-                    <ng-template #anexosVazio>
-                      <p class="text-muted small mb-0">Nenhum arquivo enviado.</p>
-                    </ng-template>
-                  </div>
-                </div>
-              </div>
+        <div class="clientes-table">
+          @if (loading()) {
+            <div class="clientes-empty text-center text-muted py-5">Carregando clientes...</div>
+          } @else if (error()) {
+            <div class="alert alert-danger" role="alert">{{ error() }}</div>
+          } @else if (pagedClientes().length > 0) {
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" class="text-center" style="width: 50px">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        [checked]="selectionStatus().all"
+                        [indeterminate]="selectionStatus().indeterminate"
+                        (change)="toggleSelectAll($any($event.target).checked)"
+                        aria-label="Selecionar todos"
+                      />
+                    </th>
+                    <th scope="col">Nome/Empresa</th>
+                    <th scope="col" class="text-center">Tipo</th>
+                    <th scope="col">Documento</th>
+                    <th scope="col">Telefone</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="text-end">Acoes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (cliente of pagedClientes(); track trackByCliente($index, cliente)) {
+                    <tr>
+                      <td class="text-center">
+                        <input
+                          type="checkbox"
+                          class="form-check-input"
+                          [checked]="isClienteSelecionado(cliente)"
+                          (change)="toggleClienteSelection(cliente, $any($event.target).checked)"
+                          aria-label="Selecionar cliente" />
+                      </td>
+                      <td>
+                        <div class="fw-semibold d-flex align-items-center gap-2">
+                          {{ getNome(cliente) }}
+                          @if (isVip(cliente)) {
+                            <span class="badge text-bg-warning-subtle text-uppercase">VIP</span>
+                          }
+                        </div>
+                        <div class="text-muted small">
+                          #{{ getCodigo(cliente) }} &bull; {{ getEmail(cliente) }}
+                        </div>
+                      </td>
+                      <td class="text-center">
+                        <span class="badge text-bg-light border">{{ getPessoaTipo(cliente) || '--' }}</span>
+                      </td>
+                      <td>{{ getDocumento(cliente) }}</td>
+                      <td>{{ getTelefone(cliente) }}</td>
+                      <td>
+                        <span [class]="getStatusBadgeClass(cliente)">{{ getStatusLabel(cliente) }}</span>
+                      </td>
+                      <td class="text-end">
+                        <div class="btn-group btn-group-sm" role="group">
+                          <button type="button" class="btn btn-outline-secondary">Editar</button>
+                          <button type="button" class="btn btn-outline-secondary">...</button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
             </div>
-          </article>
+          } @else {
+            <div class="clientes-empty text-center text-muted py-5">
+              {{ emptyStateMessage() }}
+            </div>
+          }
         </div>
-      </ng-container>
-    </ng-template>
 
-    <ng-template #emptyState>
-      <div class="py-5 text-center text-muted">
-        Nenhum cliente cadastrado no momento.
+        @if (!loading() && !error()) {
+          <div class="clientes-pagination mt-4 d-flex flex-wrap align-items-center gap-3">
+            <div class="clientes-pagination__info small text-muted">
+              @if (paginationInfo().total > 0) {
+                Mostrando {{ paginationInfo().start }}-{{ paginationInfo().end }} de {{ paginationInfo().total }} clientes
+              } @else {
+                Nenhum cliente para listar
+              }
+            </div>
+
+            <div class="clientes-pagination__pages btn-group" role="group">
+              <button type="button" class="btn btn-outline-secondary" (click)="previousPage()" [disabled]="page() === 1">
+                &laquo;
+              </button>
+              @for (pageNumber of pageWindow(); track pageNumber) {
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  [class.active]="pageNumber === page()"
+                  (click)="goToPage(pageNumber)"
+                >
+                  {{ pageNumber }}
+                </button>
+              }
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                (click)="nextPage()"
+                [disabled]="page() === totalPages()"
+              >
+                &raquo;
+              </button>
+            </div>
+
+            <div class="clientes-pagination__page-size d-flex align-items-center gap-2 ms-auto">
+              <label for="clientes-page-size" class="form-label mb-0 small text-muted">Itens por pagina</label>
+              <select
+                id="clientes-page-size"
+                class="form-select form-select-sm"
+                (change)="handlePageSizeChange($event)"
+              >
+                @for (size of pageSizeOptions; track size) {
+                  <option [value]="size" [selected]="size === pageSize()">
+                    {{ size }}
+                  </option>
+                }
+              </select>
+            </div>
+          </div>
+        }
       </div>
-    </ng-template>
-  </div>
+    </section>
+  } @else {
+    <section class="card shadow-sm clientes-form">
+      <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h5 class="mb-1">Novo cliente</h5>
+          <small class="text-muted">Preencha os dados nas abas para concluir o cadastro.</small>
+        </div>
+        <div class="clientes-form__actions d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary" (click)="cancelCreateForm()">Voltar</button>
+          <button type="submit" class="btn btn-primary" form="cliente-form">Salvar</button>
+        </div>
+      </div>
+
+      <div class="card-body">
+        @if (formFeedback()) {
+          <div class="alert alert-success" role="status">
+            {{ formFeedback() }}
+          </div>
+        }
+
+        <form id="cliente-form" [formGroup]="clienteForm" (ngSubmit)="submitClienteForm()" novalidate>
+          <ul class="nav nav-tabs clientes-tabs mb-4" role="tablist">
+            @for (tab of clienteTabs; track tab.id) {
+              <li class="nav-item" role="presentation">
+                <button
+                  type="button"
+                  class="nav-link"
+                  [class.active]="activeTab() === tab.id"
+                  (click)="selectTab(tab.id)"
+                >
+                  {{ tab.label }}
+                </button>
+              </li>
+            }
+          </ul>
+
+          <div class="clientes-tab__pane">
+            @switch (activeTab()) {
+              @case ('dados') {
+                <div class="row g-3">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Tipo de pessoa</label>
+                    <select class="form-select" formControlName="tipoPessoa">
+                      <option value="PF">Pessoa fisica</option>
+                      <option value="PJ">Pessoa juridica</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" formControlName="status">
+                      <option value="ATIVO">Ativo</option>
+                      <option value="INATIVO">Inativo</option>
+                      <option value="SUSPENSO">Suspenso</option>
+                      <option value="BLOQUEADO">Bloqueado</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Origem</label>
+                    <input type="text" class="form-control" formControlName="origem" placeholder="Indique a origem" />
+                  </div>
+                  <div class="col-12 col-md-8">
+                    <label class="form-label">Nome / Razao social</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      formControlName="nome"
+                      [class.is-invalid]="formControls.nome.invalid && formControls.nome.touched"
+                    />
+                    @if (formControls.nome.invalid && formControls.nome.touched) {
+                      <div class="invalid-feedback d-block">Informe o nome do cliente.</div>
+                    }
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Documento</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      formControlName="documento"
+                      [class.is-invalid]="formControls.documento.invalid && formControls.documento.touched"
+                    />
+                    @if (formControls.documento.invalid && formControls.documento.touched) {
+                      <div class="invalid-feedback d-block">Documento obrigatorio.</div>
+                    }
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Telefone</label>
+                    <input type="tel" class="form-control" formControlName="telefone" />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">E-mail</label>
+                    <input type="email" class="form-control" formControlName="email" />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Cliente VIP</label>
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" formControlName="vip" id="cliente-vip" />
+                      <label class="form-check-label" for="cliente-vip">Destacar como VIP</label>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">Observacoes</label>
+                    <textarea class="form-control" rows="3" formControlName="observacoes"></textarea>
+                  </div>
+                </div>
+              }
+              @case ('endereco') {
+                <div class="row g-3">
+                  <div class="col-12 col-md-3">
+                    <label class="form-label">CEP</label>
+                    <input type="text" class="form-control" formControlName="cep" placeholder="00000-000" />
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label">Endereco</label>
+                    <input type="text" class="form-control" formControlName="endereco" />
+                  </div>
+                  <div class="col-12 col-md-3">
+                    <label class="form-label">Numero</label>
+                    <input type="text" class="form-control" formControlName="numero" />
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label">Complemento</label>
+                    <input type="text" class="form-control" formControlName="complemento" />
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label">Bairro</label>
+                    <input type="text" class="form-control" formControlName="bairro" />
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label">Cidade</label>
+                    <input type="text" class="form-control" formControlName="cidade" />
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label class="form-label">Estado</label>
+                    <input type="text" class="form-control" formControlName="estado" />
+                  </div>
+                </div>
+              }
+              @case ('contatos') {
+                <div class="row g-3">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Tipo</label>
+                    <select class="form-select" formControlName="contatoTipo">
+                      <option value="Telefone">Telefone</option>
+                      <option value="WhatsApp">WhatsApp</option>
+                      <option value="Email">E-mail</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Nome do contato</label>
+                    <input type="text" class="form-control" formControlName="contatoNome" />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Telefone / Valor</label>
+                    <input type="text" class="form-control" formControlName="contatoTelefone" />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">E-mail</label>
+                    <input type="email" class="form-control" formControlName="contatoEmail" />
+                  </div>
+                </div>
+              }
+              @case ('documentos') {
+                <div class="row g-3">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Tipo</label>
+                    <select class="form-select" formControlName="documentoTipo">
+                      <option value="RG">RG</option>
+                      <option value="CPF">CPF</option>
+                      <option value="CNH">CNH</option>
+                      <option value="CNPJ">CNPJ</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Orgao emissor</label>
+                    <input type="text" class="form-control" formControlName="documentoEmissor" />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Validade</label>
+                    <input type="date" class="form-control" formControlName="documentoVencimento" />
+                  </div>
+                </div>
+              }
+              @case ('lgpd') {
+                <div class="row g-3">
+                  <div class="col-12">
+                    <div class="form-check form-switch">
+                      <input type="checkbox" class="form-check-input" id="lgpd-consent" formControlName="lgpdConsentimento" />
+                      <label class="form-check-label" for="lgpd-consent">
+                        Cliente autorizou comunicacoes (LGPD)
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Canal</label>
+                    <input type="text" class="form-control" formControlName="lgpdCanal" placeholder="E-mail, WhatsApp..." />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Data do consentimento</label>
+                    <input type="date" class="form-control" formControlName="lgpdData" />
+                  </div>
+                </div>
+              }
+              @case ('financeiro') {
+                <div class="row g-3">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Limite de credito</label>
+                    <input type="number" class="form-control" formControlName="financeiroLimite" placeholder="0,00" />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Forma de pagamento preferida</label>
+                    <input type="text" class="form-control" formControlName="financeiroFormaPagamento" />
+                  </div>
+                  <div class="col-12">
+                    <div class="text-muted small">
+                      Configure regras financeiras e politicas de cobranca para o cliente.
+                    </div>
+                  </div>
+                </div>
+              }
+              @case ('anexos') {
+                <div class="clientes-anexos text-center text-muted p-5 border rounded-3">
+                  <p class="mb-3">Arraste arquivos aqui ou clique em enviar documento.</p>
+                  <button type="button" class="btn btn-outline-secondary">Enviar documento</button>
+                </div>
+              }
+            }
+          </div>
+
+          <div class="clientes-form__footer d-flex justify-content-end gap-2 mt-4">
+            <button type="button" class="btn btn-outline-secondary" (click)="cancelCreateForm()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar cliente</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  }
 </div>

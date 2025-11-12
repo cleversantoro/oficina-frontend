@@ -38,7 +38,7 @@ export class Servico {
   }
 
   protected trackByOrdem = (_: number, ordem: OrdemServico): string =>
-    ordem.id ?? `${_}`
+    ordem.id?.toString() ?? ordem.ordemServicoId?.toString() ?? `${_}`
 
   protected readonly formatStatus = (status?: string): string =>
     status ? status.replaceAll('_', ' ').toUpperCase() : '—'
