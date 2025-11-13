@@ -1,20 +1,15 @@
 export type OrdemServicoStatus = 'ABERTA' | 'EM_ANDAMENTO' | 'CONCLUIDA' | 'CANCELADA' | string
 
 export interface OrdemServicoItem {
-  id?: number
-  ordemServicoId?: number
-  ordem_servico_id?: number
-  pecaId?: number | null
-  peca_id?: number | null
+  id: number
+  ordem_Servico_Id?: number
+  peca_Id?: number | null
   descricao?: string
   quantidade?: number
-  valorUnitario?: number
-  valor_unitario?: number
+  valor_Unitario?: number
   total?: number
-  createdAt?: string
-  created_at?: string
-  updatedAt?: string | null
-  updated_at?: string | null
+  created_At?: string
+  updated_At?: string | null
 }
 
 export interface OrdemServicoAnexo {
@@ -106,24 +101,17 @@ export interface OrdemServicoObservacao {
 }
 
 export interface OrdemServico {
-  id: number
+  id?: number | string
   ordemServicoId?: number
   ordem_servico_id?: number
-  clienteId?: number
-  cliente_id?: number
-  mecanicoId?: number
-  mecanico_id?: number
-  descricaoProblema?: string
-  descricao_problema?: string
+  cliente_Id?: number
+  mecanico_Id?: number
+  descricao_Problema?: string
   status?: OrdemServicoStatus
-  dataAbertura?: string
-  data_abertura?: string
-  dataConclusao?: string | null
-  data_conclusao?: string | null
-  createdAt?: string
-  created_at?: string
-  updatedAt?: string | null
-  updated_at?: string | null
+  data_Abertura?: string
+  data_Conclusao?: string | null
+  created_At?: string
+  updated_At?: string | null
   itens?: OrdemServicoItem[]
   anexos?: OrdemServicoAnexo[]
   historicos?: OrdemServicoHistorico[]
@@ -131,4 +119,45 @@ export interface OrdemServico {
   avaliacoes?: OrdemServicoAvaliacao[]
   pagamentos?: OrdemServicoPagamento[]
   observacoes?: OrdemServicoObservacao[]
+}
+
+export type SaveOrdemServicoPayload = {
+  cliente_id: number
+  mecanico_id: number
+  descricao_problema: string
+  status?: OrdemServicoStatus
+  data_abertura?: string
+  data_conclusao?: string | null
+}
+
+export type OrdemServicoAnexoPayload = {
+  nome: string
+  tipo?: string
+  url?: string
+  observacao?: string | null
+}
+
+export type OrdemServicoChecklistPayload = {
+  item: string
+  realizado?: boolean
+  observacao?: string | null
+}
+
+export type OrdemServicoAvaliacaoPayload = {
+  nota: number
+  comentario?: string | null
+  usuario?: string | null
+}
+
+export type OrdemServicoPagamentoPayload = {
+  valor: number
+  status: string
+  data_pagamento?: string | null
+  metodo?: string | null
+  observacao?: string | null
+}
+
+export type OrdemServicoObservacaoPayload = {
+  usuario?: string | null
+  texto: string
 }

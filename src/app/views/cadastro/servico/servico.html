@@ -1,56 +1,434 @@
-<app-page-title title="Serviços" subTitle="Cadastro"/>
+<app-page-title title="Ordens de Serviço" subTitle="Consulta e gestão" />
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body d-flex flex-wrap gap-3 align-items-center justify-content-between">
+    <div>
+      <h5 class="mb-1">Painel de ordens</h5>
+      <p class="text-muted mb-0">Crie, monitore e exporte as ordens de serviço registradas.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-primary" type="button" (click)="openCreateModal()">
+        Nova ordem de serviço
+      </button>
+      <button
+        class="btn btn-outline-secondary"
+        type="button"
+        (click)="exportAsExcel()"
+        [disabled]="exporting() === 'excel' || loading()"
+      >
+        @if (exporting() === 'excel') {
+          <span>Exportando...</span>
+        } @else {
+          <span>Exportar para Excel</span>
+        }
+      </button>
+      <button
+        class="btn btn-outline-secondary"
+        type="button"
+        (click)="exportAsPdf()"
+        [disabled]="exporting() === 'pdf' || loading()"
+      >
+        @if (exporting() === 'pdf') {
+          <span>Gerando arquivo...</span>
+        } @else {
+          <span>Exportar para PDF</span>
+        }
+      </button>
+    </div>
+  </div>
+</div>
+
+@if (successMessage()) {
+  <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+    {{ successMessage() }}
+    <button type="button" class="btn-close" aria-label="Fechar" (click)="clearMessage()"></button>
+  </div>
+}
+
+@if (error()) {
+  <div class="alert alert-danger mb-3" role="alert">
+    {{ error() }}
+  </div>
+}
 
 <div class="card shadow-sm">
+  <div class="card-header d-flex flex-wrap gap-3 align-items-center justify-content-between">
+    <div class="input-group search-group">
+      <span class="input-group-text">Buscar</span>
+      <input
+        type="search"
+        class="form-control"
+        placeholder="Buscar por código, cliente, mecânico ou status..."
+        [value]="searchTerm()"
+        (input)="handleSearch($any($event.target).value)"
+      />
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <label class="text-muted small mb-0" for="pageSize">Itens por página</label>
+      <select
+        id="pageSize"
+        class="form-select form-select-sm"
+        [value]="pageSize()"
+        (change)="setPageSize(($any($event.target).value))"
+      >
+        @for (option of pageSizeOptions; track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+    </div>
+  </div>
   <div class="card-body p-0">
-    <ng-container *ngIf="loading(); else content">
+    @if (loading()) {
       <div class="py-5 text-center text-muted">Carregando ordens de serviço...</div>
-    </ng-container>
-
-    <ng-template #content>
-      <ng-container *ngIf="error(); else ordensTable">
-        <div class="alert alert-danger m-3" role="alert">
-          {{ error() }}
-        </div>
-      </ng-container>
-    </ng-template>
-
-    <ng-template #ordensTable>
-      <ng-container *ngIf="ordens().length > 0; else emptyState">
+    } @else {
+      @if (paginatedOrdens().length > 0) {
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
-                <th scope="col">Ordem</th>
+                <th scope="col">OS</th>
                 <th scope="col">Cliente</th>
                 <th scope="col">Mecânico</th>
-                <th scope="col">Descrição</th>
+                <th scope="col">Descrição do problema</th>
                 <th scope="col">Status</th>
-                <th scope="col">Criada em</th>
+                <th scope="col">Abertura</th>
+                <th scope="col">Conclusão</th>
+                <th scope="col" class="text-end">Ações</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let ordem of ordens(); trackBy: trackByOrdem">
-                <td class="fw-semibold">{{ ordem.id || '—' }}</td>
-                <td>{{ ordem.cliente_id || '—' }}</td>
-                <td>{{ ordem.mecanico_id || '—' }}</td>
-                <td class="text-wrap" style="max-width: 320px;">
-                  {{ ordem.descricao_problema || '—' }}
-                </td>
-                <td>{{ formatStatus(ordem.status) }}</td>
-                <td>
-                  {{ ordem.created_at ? (ordem.created_at | date: 'short') : '—' }}
-                </td>
-              </tr>
+              @for (ordem of paginatedOrdens(); track trackByOrdem($index, ordem)) {
+                <tr>
+                  <td class="fw-semibold">#{{ ordem.id ?? ordem.ordemServicoId }}</td>
+                  <td>{{ ordem.cliente_Id ?? '--' }}</td>
+                  <td>{{ ordem.mecanico_Id ?? '--' }}</td>
+                  <td class="text-wrap problem-col">{{ ordem.descricao_Problema ?? '--' }}</td>
+                  <td>
+                    <span [class]="badgeClass(ordem.status)">
+                      {{ (ordem.status ?? 'ABERTA').replace('_', ' ') }}
+                    </span>
+                  </td>
+                  <td>{{ formatDate(ordem.data_Abertura) }}</td>
+                  <td>{{ formatDate(ordem.data_Conclusao) }}</td>
+                  <td class="text-end">
+                    <button
+                      class="btn btn-link btn-sm"
+                      type="button"
+                      (click)="openDetailsModal(ordem)"
+                    >
+                      Detalhes
+                    </button>
+                    <button
+                      class="btn btn-link btn-sm"
+                      type="button"
+                      (click)="openEditModal(ordem)"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      class="btn btn-link btn-sm text-danger"
+                      type="button"
+                      (click)="openDeleteModal(ordem)"
+                    >
+                      Excluir
+                    </button>
+                  </td>
+                </tr>
+              }
             </tbody>
           </table>
         </div>
-      </ng-container>
-    </ng-template>
-
-    <ng-template #emptyState>
-      <div class="py-5 text-center text-muted">
-        Nenhuma ordem de serviço cadastrada no momento.
-      </div>
-    </ng-template>
+      } @else {
+        <div class="py-5 text-center text-muted">
+          Nenhuma ordem encontrada para os filtros informados.
+        </div>
+      }
+    }
   </div>
+  @if (!loading() && filteredOrdens().length > 0) {
+    <div class="card-footer d-flex flex-wrap gap-3 align-items-center justify-content-between">
+      <small class="text-muted">
+        Mostrando {{ paginationInfo().start }} - {{ paginationInfo().end }}
+        de {{ paginationInfo().total }} ordens
+      </small>
+      <div class="btn-group">
+        <button
+          class="btn btn-outline-secondary btn-sm"
+          type="button"
+          (click)="changePage(-1)"
+          [disabled]="page() === 1"
+        >
+          Anterior
+        </button>
+        <span class="btn btn-outline-secondary btn-sm disabled">
+          Página {{ page() }} / {{ totalPages() }}
+        </span>
+        <button
+          class="btn btn-outline-secondary btn-sm"
+          type="button"
+          (click)="changePage(1)"
+          [disabled]="page() === totalPages()"
+        >
+          Próxima
+        </button>
+      </div>
+    </div>
+  }
 </div>
+
+@if (modalState() === 'create' || modalState() === 'edit') {
+  <div class="modal-wrapper" (click)="closeModal()">
+    <div class="modal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title mb-0">
+            {{ modalState() === 'edit' ? 'Editar ordem de serviço' : 'Nova ordem de serviço' }}
+          </h5>
+          <small class="text-muted">
+            {{ modalState() === 'edit' ? 'Atualize os campos necessários.' : 'Preencha os dados para criar uma nova OS.' }}
+          </small>
+        </div>
+        <button type="button" class="btn-close" aria-label="Fechar" (click)="closeModal()"></button>
+      </div>
+      <form class="modal-body" [formGroup]="ordemForm" (ngSubmit)="submitOrdem()">
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label">Cliente *</label>
+            <input
+              type="number"
+              class="form-control"
+              formControlName="cliente_id"
+              min="1"
+              placeholder="ID do cliente"
+            />
+            @if (formControls.cliente_id.touched && formControls.cliente_id.invalid) {
+              <small class="text-danger">Informe o cliente responsável.</small>
+            }
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Mecânico *</label>
+            <input
+              type="number"
+              class="form-control"
+              formControlName="mecanico_id"
+              min="1"
+              placeholder="ID do mecânico"
+            />
+            @if (formControls.mecanico_id.touched && formControls.mecanico_id.invalid) {
+              <small class="text-danger">Informe o mecânico responsável.</small>
+            }
+          </div>
+          <div class="col-12">
+            <label class="form-label">Descrição do problema *</label>
+            <textarea
+              rows="3"
+              class="form-control"
+              formControlName="descricao_Problema"
+              placeholder="Detalhe o que precisa ser executado"
+            ></textarea>
+            @if (formControls.descricao_Problema.touched && formControls.descricao_Problema.invalid) {
+              <small class="text-danger">Descrição é obrigatória.</small>
+            }
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Status *</label>
+            <select class="form-select" formControlName="status">
+              @for (status of statusOptions; track status) {
+                <option [value]="status">{{ status.replace('_', ' ') }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Data de abertura</label>
+            <input type="datetime-local" class="form-control" formControlName="data_abertura" />
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label">Data de conclusão</label>
+            <input type="datetime-local" class="form-control" formControlName="data_conclusao" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-link text-muted" type="button" (click)="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" type="submit" [disabled]="saving()">
+            @if (saving()) {
+              <span>Salvando...</span>
+            } @else {
+              <span>Salvar</span>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (modalState() === 'details' && selected()) {
+  <div class="modal-wrapper" (click)="closeModal()">
+    <div class="modal-card modal-lg" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title mb-0">Detalhes da OS #{{ selected()?.id  }}</h5>
+          <small class="text-muted">
+            Última atualização em {{ formatDate(selected()?.updated_At ) }}
+          </small>
+        </div>
+        <button type="button" class="btn-close" aria-label="Fechar" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3 mb-3">
+          <div class="col-6 col-md-3">
+            <strong class="d-block text-muted text-uppercase small">Cliente</strong>
+            <span class="d-block">{{ selected()?.cliente_Id ?? '--' }}</span>
+          </div>
+          <div class="col-6 col-md-3">
+            <strong class="d-block text-muted text-uppercase small">Mecânico</strong>
+            <span class="d-block">{{ selected()?.mecanico_Id ??  '--' }}</span>
+          </div>
+          <div class="col-6 col-md-3">
+            <strong class="d-block text-muted text-uppercase small">Aberta em</strong>
+            <span class="d-block">{{ formatDate(selected()?.data_Abertura ) }}</span>
+          </div>
+          <div class="col-6 col-md-3">
+            <strong class="d-block text-muted text-uppercase small">Conclusão</strong>
+            <span class="d-block">{{ formatDate(selected()?.data_Conclusao ) }}</span>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <strong class="d-block text-muted text-uppercase small mb-1">Descrição do problema</strong>
+          <p class="mb-0">
+            {{ selected()?.descricao_Problema ?? '--' }}
+          </p>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <div class="detail-card">
+              <div class="detail-card__header">
+                <h6 class="mb-0">Checklists</h6>
+              </div>
+              <div class="detail-card__body">
+                @if (selected()?.checklists?.length) {
+                  <ul class="list-unstyled mb-0">
+                    @for (checklist of selected()?.checklists ?? []; track $index) {
+                      <li class="d-flex justify-content-between small py-1 border-bottom">
+                        <span>{{ checklist.item }}</span>
+                        <span
+                          class="badge"
+                          [class]="checklist.realizado ? 'text-bg-success-subtle' : 'text-bg-secondary-subtle'"
+                          >{{ checklist.realizado ? 'Realizado' : 'Pendente' }}</span
+                        >
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="text-muted mb-0 small">Nenhum checklist registrado.</p>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="detail-card">
+              <div class="detail-card__header">
+                <h6 class="mb-0">Pagamentos</h6>
+              </div>
+              <div class="detail-card__body">
+                @if (selected()?.pagamentos?.length) {
+                  <ul class="list-unstyled mb-0">
+                    @for (pagamento of selected()?.pagamentos ?? []; track $index) {
+                      <li class="d-flex justify-content-between small py-1 border-bottom">
+                        <span>{{ pagamento.metodo ?? 'Indefinido' }}</span>
+                        <span>
+                          {{ pagamento.valor | currency: 'BRL' : 'symbol-narrow' : '1.2-2' }}
+                          <span class="badge ms-1" [class]="badgeClass(pagamento.status)">
+                            {{ pagamento.status ?? '--' }}
+                          </span>
+                        </span>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="text-muted mb-0 small">Nenhum pagamento registrado.</p>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-card mt-3">
+          <div class="detail-card__header">
+            <h6 class="mb-0">Itens</h6>
+          </div>
+          <div class="detail-card__body">
+            @if (selected()?.itens?.length) {
+              <ul class="list-unstyled mb-0">
+                @for (Item of selected()?.itens ?? []; track $index) {
+                  <li class="mb-2">
+                    <p class="mb-0">{{ formatCurrency(Item.valor_Unitario) }} - {{ Item.descricao }}</p>
+                    <div class="small text-muted">{{ formatDate(Item.created_At ) }}</div>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="text-muted mb-0 small">Nenhuma observação registrada.</p>
+            }
+          </div>
+        </div>
+
+
+        <div class="detail-card mt-3">
+          <div class="detail-card__header">
+            <h6 class="mb-0">Observações internas</h6>
+          </div>
+          <div class="detail-card__body">
+            @if (selected()?.observacoes?.length) {
+              <ul class="list-unstyled mb-0">
+                @for (obs of selected()?.observacoes ?? []; track $index) {
+                  <li class="mb-2">
+                    <div class="small text-muted">
+                      {{ obs.usuario ?? 'Equipe' }} · {{ formatDate(obs.created_at ?? obs.createdAt) }}
+                    </div>
+                    <p class="mb-0">{{ obs.texto }}</p>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="text-muted mb-0 small">Nenhuma observação registrada.</p>
+            }
+          </div>
+        </div>
+
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-link" type="button" (click)="closeModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (modalState() === 'delete' && selected()) {
+  <div class="modal-wrapper" (click)="closeModal()">
+    <div class="modal-card modal-sm" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h5 class="modal-title mb-0">Excluir ordem</h5>
+        <button type="button" class="btn-close" aria-label="Fechar" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        Tem certeza que deseja remover a ordem
+        <strong>#{{ selected()?.id ?? selected()?.ordemServicoId }}</strong>?
+        Esta ação não poderá ser desfeita.
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-link text-muted" type="button" (click)="closeModal()">Cancelar</button>
+        <button class="btn btn-danger" type="button" (click)="confirmDelete()" [disabled]="deleting()">
+          @if (deleting()) {
+            <span>Removendo...</span>
+          } @else {
+            <span>Excluir</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

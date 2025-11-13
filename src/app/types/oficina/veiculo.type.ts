@@ -1,4 +1,4 @@
-export type VeVeiculoCombustivel = string
+export type VeVeiculoCombustivel = 'GASOLINA' | 'ETANOL' | 'DIESEL' | 'FLEX' | 'ELETRICO' | 'HIBRIDO' | string
 
 export interface VeMarca {
   id?: number
@@ -28,21 +28,17 @@ export interface VeModelo {
 
 export interface VeVeiculo {
   id: number
-  veiculoId?: number
-  veiculo_id?: number
   clienteId?: number
-  cliente_id?: number
+  clienteCodigo?: string | null
+  clienteNome?: string | null
   placa?: string
-  marca?: string | null
+  marcaId?: number
+  marcaNome?: string | null
+  marcaPais?: string | null
   modeloId?: number | null
-  modelo_id?: number | null
-  ano?: number | null
-  anoFabricacao?: number | null
-  ano_fabricacao?: number | null
-  anoModelo?: number | null
-  ano_modelo?: number | null
-  ano_fab?: number | null
-  ano_mod?: number | null
+  modeloNome?: string | null
+  ano_Fab?: number | null
+  ano_Mod?: number | null
   cor?: string | null
   chassi?: string | null
   renavam?: string | null
@@ -50,14 +46,11 @@ export interface VeVeiculo {
   observacao?: string | null
   principal?: boolean
   ativo?: boolean
-  kmAtual?: number | null
-  km_atual?: number | null
+  km?: number | null
   createdAt?: string
   created_at?: string
   updatedAt?: string | null
   updated_at?: string | null
-  modelo?: VeModelo | null
-  marcaInfo?: VeMarca | null
 }
 
 export type SaveVeiculoPayload = Omit<VeVeiculo, 'id'> & { id?: number }

@@ -2,30 +2,30 @@
 
 <div class="row g-3 mb-4">
   @for (card of resumo(); track trackResumo($index, card)) {
-    <div class="col-6 col-md-3">
-      <div class="resumo-card">
-        <span class="label text-muted text-uppercase">{{ card.label }}</span>
-        <strong class="value">{{ card.value }}</strong>
-      </div>
+  <div class="col-6 col-md-3">
+    <div class="resumo-card">
+      <span class="label text-muted text-uppercase">{{ card.label }}</span>
+      <strong class="value">{{ card.value }}</strong>
     </div>
+  </div>
   }
 </div>
 
 @if (successMessage()) {
-  <div class="mb-3">
-    <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
-      {{ successMessage() }}
-      <button type="button" class="btn-close" aria-label="Fechar" (click)="clearMessage()"></button>
-    </div>
+<div class="mb-3">
+  <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
+    {{ successMessage() }}
+    <button type="button" class="btn-close" aria-label="Fechar" (click)="clearMessage()"></button>
   </div>
+</div>
 }
 
 @if (error()) {
-  <div class="mb-3">
-    <div class="alert alert-danger mb-0" role="alert">
-      {{ error() }}
-    </div>
+<div class="mb-3">
+  <div class="alert alert-danger mb-0" role="alert">
+    {{ error() }}
   </div>
+</div>
 }
 
 <div class="card shadow-sm">
@@ -40,222 +40,189 @@
   </div>
   <div class="card-body p-0">
     @if (loading()) {
-      <div class="py-5 text-center text-muted">Carregando veiculos...</div>
+    <div class="py-5 text-center text-muted">Carregando veiculos...</div>
     } @else {
-      @if (veiculos().length > 0) {
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th scope="col">Placa</th>
-                <th scope="col">Cliente</th>
-                <th scope="col">Modelo</th>
-                <th scope="col">Ano</th>
-                <th scope="col">Cor</th>
-                <th scope="col">Combustivel</th>
-                <th scope="col">KM</th>
-                <th scope="col">Status</th>
-                <th scope="col" class="text-end">Acoes</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (veiculo of veiculos(); track trackByVeiculo($index, veiculo)) {
-                <tr>
-                  <td class="fw-semibold text-uppercase">{{ veiculo.placa }}</td>
-                  <td>#{{ veiculo.cliente_id }}</td>
-                  <td>#{{ veiculo.modelo_id }}</td>
-                  <td>
-                    <div class="d-flex flex-column small text-muted">
-                      <span>Fabricacao</span>
-                      <span class="text-body">{{ veiculo.ano_fab || '---' }}</span>
-                    </div>
-                    <div class="d-flex flex-column small text-muted">
-                      <span>Modelo</span>
-                      <span class="text-body">{{ veiculo.ano_mod || '---' }}</span>
-                    </div>
-                  </td>
-                  <td>{{ veiculo.cor || '---' }}</td>
-                  <td>{{ veiculo.combustivel || '---' }}</td>
-                  <td>{{ (veiculo.km_atual ?? 0) | number: '1.0-0' }} km</td>
-                  <td>
-                    <span [class]="getStatusBadge(veiculo)">{{ veiculo.ativo ? 'Ativo' : 'Inativo' }}</span>
-                  </td>
-                  <td class="text-end">
-                    <button class="btn btn-link btn-sm" type="button" (click)="editVeiculo(veiculo)">Editar</button>
-                    <button
-                      class="btn btn-link btn-sm text-danger"
-                      type="button"
-                      (click)="deleteVeiculo(veiculo)"
-                      [disabled]="deletingId() === veiculo.id"
-                    >
-                      @if (deletingId() === veiculo.id) {
-                        <span>Removendo...</span>
-                      } @else {
-                        <span>Remover</span>
-                      }
-                    </button>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      } @else {
-        <div class="py-5 text-center text-muted">
-          Nenhum veiculo cadastrado ate o momento.
-        </div>
-      }
+    @if (veiculos().length > 0) {
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Placa</th>
+            <th scope="col">Cliente</th>
+            <th scope="col">Modelo</th>
+            <th scope="col">Ano</th>
+            <th scope="col">Cor</th>
+            <th scope="col">Combustivel</th>
+            <th scope="col">KM</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="text-end">Acoes</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (veiculo of veiculos(); track trackByVeiculo($index, veiculo)) {
+          <tr>
+            <td class="fw-semibold text-uppercase">{{ veiculo.placa }}</td>
+            <td>{{ veiculo.clienteNome }}</td>
+            <td>{{ veiculo.modeloNome }}</td>
+            <td>
+              <div class="d-flex flex-column small text-muted">
+                <span>Fabricacao</span>
+                <span class="text-body">{{ veiculo.ano_Fab || '---' }}</span>
+              </div>
+              <div class="d-flex flex-column small text-muted">
+                <span>Modelo</span>
+                <span class="text-body">{{ veiculo.ano_Mod || '---' }}</span>
+              </div>
+            </td>
+            <td>{{ veiculo.cor || '---' }}</td>
+            <td>{{ veiculo.combustivel || '---' }}</td>
+            <td>{{ (veiculo.km ?? 0) | number: '1.0-0' }} km</td>
+            <td>
+              <span class="badge rounded-pill" [class]="getStatusBadge(veiculo)">{{ veiculo.ativo ? 'Ativo' : 'Inativo'
+                }}</span>
+            </td>
+            <td class="text-end">
+              <button class="btn btn-link btn-sm" type="button" (click)="editVeiculo(veiculo)">Editar</button>
+              <button class="btn btn-link btn-sm text-danger" type="button" (click)="deleteVeiculo(veiculo)"
+                [disabled]="deletingId() === veiculo.id">
+                @if (deletingId() === veiculo.id) { <span>Removendo...</span> }
+                @else { <span>Remover</span> }
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="py-5 text-center text-muted">
+      Nenhum veiculo cadastrado ate o momento.
+    </div>
+    }
     }
   </div>
 </div>
 
 @if (modalOpen()) {
-  <div class="modal-wrapper" (click)="cancelEdicao()">
-    <div class="modal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <div>
-          <h5 class="modal-title mb-0">{{ modalTitle() }}</h5>
-          <small class="text-muted">
-            {{ isEditing() ? 'Atualize os dados do veiculo selecionado.' : 'Preencha os campos para cadastrar.' }}
-          </small>
+<div class="modal-wrapper" (click)="cancelEdicao()">
+  <div class="modal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h5 class="modal-title mb-0">{{ modalTitle() }}</h5>
+        <small class="text-muted">
+          {{ isEditing() ? 'Atualize os dados do veiculo selecionado.' : 'Preencha os campos para cadastrar.' }}
+        </small>
+      </div>
+      <button type="button" class="btn-close" aria-label="Fechar" (click)="cancelEdicao()"></button>
+    </div>
+
+    <div class="modal-body">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="veiculo-form">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Cliente</label>
+            <input type="text" class="form-control" formControlName="clienteNome"
+              [class.is-invalid]="controls.clienteNome.touched && controls.clienteNome.invalid" placeholder=""
+              min="1" />
+            @if (controls.clienteNome.touched && controls.clienteNome.invalid) {
+            <div class="invalid-feedback d-block">
+              Informe o identificador do cliente proprietario.
+            </div>
+            }
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Modelo</label>
+            <input type="text" class="form-control" formControlName="modeloNome"
+              [class.is-invalid]="controls.modeloNome.touched && controls.modeloNome.invalid" placeholder="" min="1" />
+            @if (controls.modeloNome.touched && controls.modeloNome.invalid) {
+            <div class="invalid-feedback d-block">
+              Informe o identificador do modelo do veiculo.
+            </div>
+            }
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Placa *</label>
+            <input type="text" class="form-control text-uppercase" formControlName="placa" maxlength="8"
+              placeholder="AAA0A00" [class.is-invalid]="controls.placa.touched && controls.placa.invalid" />
+            @if (controls.placa.touched && controls.placa.invalid) {
+            <div class="invalid-feedback d-block">
+              Informe uma placa valida (ate 8 caracteres).
+            </div>
+            }
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">RENAVAM *</label>
+            <input type="text" class="form-control" formControlName="renavam" maxlength="20"
+              [class.is-invalid]="controls.renavam.touched && controls.renavam.invalid" />
+            @if (controls.renavam.touched && controls.renavam.invalid) {
+            <div class="invalid-feedback d-block">
+              Informe o RENAVAM do veiculo.
+            </div>
+            }
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Chassi *</label>
+            <input type="text" class="form-control text-uppercase" formControlName="chassi" maxlength="20"
+              [class.is-invalid]="controls.chassi.touched && controls.chassi.invalid" />
+            @if (controls.chassi.touched && controls.chassi.invalid) {
+            <div class="invalid-feedback d-block">
+              Informe o chassi completo.
+            </div>
+            }
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Ano fabricacao</label>
+            <input type="number" class="form-control" formControlName="ano_fab" min="1900" max="2100" />
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Ano modelo</label>
+            <input type="number" class="form-control" formControlName="ano_mod" min="1900" max="2100" />
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Cor</label>
+            <input type="text" class="form-control" formControlName="cor" />
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Combustivel</label>
+            <select class="form-select" formControlName="combustivel">
+              <option value="">Selecione</option>
+              @for (tipo of combustivelOptions; track tipo) {
+              <option [value]="tipo">{{ tipo }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Quilometragem atual</label>
+            <input type="number" min="0" class="form-control" formControlName="km_atual" placeholder="0" />
+          </div>
+
+          <div class="col-md-6 d-flex align-items-center">
+            <div class="form-check form-switch mt-4">
+              <input class="form-check-input" type="checkbox" role="switch" id="ativoSwitch" formControlName="ativo" />
+              <label class="form-check-label" for="ativoSwitch">Veiculo ativo</label>
+            </div>
+          </div>
         </div>
-        <button type="button" class="btn-close" aria-label="Fechar" (click)="cancelEdicao()"></button>
-      </div>
 
-      <div class="modal-body">
-        <form [formGroup]="form" (ngSubmit)="submit()" class="veiculo-form">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label">Cliente ID *</label>
-              <input
-                type="number"
-                class="form-control"
-                formControlName="cliente_id"
-                [class.is-invalid]="controls.cliente_id.touched && controls.cliente_id.invalid"
-                placeholder="Ex: 10"
-                min="1"
-              />
-              @if (controls.cliente_id.touched && controls.cliente_id.invalid) {
-                <div class="invalid-feedback d-block">
-                  Informe o identificador do cliente proprietario.
-                </div>
-              }
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Modelo ID *</label>
-              <input
-                type="number"
-                class="form-control"
-                formControlName="modelo_id"
-                [class.is-invalid]="controls.modelo_id.touched && controls.modelo_id.invalid"
-                placeholder="Ex: 152"
-                min="1"
-              />
-              @if (controls.modelo_id.touched && controls.modelo_id.invalid) {
-                <div class="invalid-feedback d-block">
-                  Informe o identificador do modelo do veiculo.
-                </div>
-              }
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Placa *</label>
-              <input
-                type="text"
-                class="form-control text-uppercase"
-                formControlName="placa"
-                maxlength="8"
-                placeholder="AAA0A00"
-                [class.is-invalid]="controls.placa.touched && controls.placa.invalid"
-              />
-              @if (controls.placa.touched && controls.placa.invalid) {
-                <div class="invalid-feedback d-block">
-                  Informe uma placa valida (ate 8 caracteres).
-                </div>
-              }
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">RENAVAM *</label>
-              <input
-                type="text"
-                class="form-control"
-                formControlName="renavam"
-                maxlength="20"
-                [class.is-invalid]="controls.renavam.touched && controls.renavam.invalid"
-              />
-              @if (controls.renavam.touched && controls.renavam.invalid) {
-                <div class="invalid-feedback d-block">
-                  Informe o RENAVAM do veiculo.
-                </div>
-              }
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Chassi *</label>
-              <input
-                type="text"
-                class="form-control text-uppercase"
-                formControlName="chassi"
-                maxlength="20"
-                [class.is-invalid]="controls.chassi.touched && controls.chassi.invalid"
-              />
-              @if (controls.chassi.touched && controls.chassi.invalid) {
-                <div class="invalid-feedback d-block">
-                  Informe o chassi completo.
-                </div>
-              }
-            </div>
-
-            <div class="col-md-3">
-              <label class="form-label">Ano fabricacao</label>
-              <input type="number" class="form-control" formControlName="ano_fab" min="1900" max="2100" />
-            </div>
-
-            <div class="col-md-3">
-              <label class="form-label">Ano modelo</label>
-              <input type="number" class="form-control" formControlName="ano_mod" min="1900" max="2100" />
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Cor</label>
-              <input type="text" class="form-control" formControlName="cor" />
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Combustivel</label>
-              <select class="form-select" formControlName="combustivel">
-                <option value="">Selecione</option>
-                @for (tipo of combustivelOptions; track tipo) {
-                  <option [value]="tipo">{{ tipo }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Quilometragem atual</label>
-              <input type="number" min="0" class="form-control" formControlName="km_atual" placeholder="0" />
-            </div>
-
-            <div class="col-md-6 d-flex align-items-center">
-              <div class="form-check form-switch mt-4">
-                <input class="form-check-input" type="checkbox" role="switch" id="ativoSwitch" formControlName="ativo" />
-                <label class="form-check-label" for="ativoSwitch">Veiculo ativo</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="d-flex gap-2 mt-4">
-            <button class="btn btn-primary flex-grow-1" type="submit" [disabled]="saving()">
-              {{ isEditing() ? 'Salvar alteracoes' : 'Cadastrar veiculo' }}
-            </button>
-            <button class="btn btn-outline-secondary" type="button" (click)="cancelEdicao()" [disabled]="saving()">
-              Cancelar
-            </button>
-          </div>
-        </form>
-      </div>
+        <div class="d-flex gap-2 mt-4">
+          <button class="btn btn-primary flex-grow-1" type="submit" [disabled]="saving()">
+            {{ isEditing() ? 'Salvar alteracoes' : 'Cadastrar veiculo' }}
+          </button>
+          <button class="btn btn-outline-secondary" type="button" (click)="cancelEdicao()" [disabled]="saving()">
+            Cancelar
+          </button>
+        </div>
+      </form>
     </div>
   </div>
+</div>
 }

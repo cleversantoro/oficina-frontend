@@ -31,17 +31,15 @@ export class Veiculo {
   protected readonly combustivelOptions = ['GASOLINA', 'ETANOL', 'DIESEL', 'FLEX', 'ELETRICO', 'HIBRIDO']
 
   protected readonly form = this.fb.group({
-    cliente_id: this.fb.control<number | null>(null, { validators: [Validators.required] }),
+    clienteId: this.fb.control<number | null>(null, { validators: [Validators.required] }),
+    clienteNome: this.fb.control('', { validators: [Validators.required, Validators.maxLength(160)] }),
     modelo_id: this.fb.control<number | null>(null, { validators: [Validators.required] }),
+    modeloNome: this.fb.control('', { validators: [Validators.required, Validators.maxLength(160)] }),
     placa: this.fb.control('', { validators: [Validators.required, Validators.maxLength(8)] }),
     renavam: this.fb.control('', { validators: [Validators.required, Validators.maxLength(20)] }),
     chassi: this.fb.control('', { validators: [Validators.required, Validators.maxLength(20)] }),
-    ano_fab: this.fb.control<number | null>(null, {
-      validators: [Validators.min(1900), Validators.max(this.currentYear + 1)],
-    }),
-    ano_mod: this.fb.control<number | null>(null, {
-      validators: [Validators.min(1900), Validators.max(this.currentYear + 2)],
-    }),
+    ano_fab: this.fb.control<number | null>(null, { validators: [Validators.min(1900), Validators.max(this.currentYear + 1)], }),
+    ano_mod: this.fb.control<number | null>(null, { validators: [Validators.min(1900), Validators.max(this.currentYear + 2)], }),
     cor: this.fb.control(''),
     combustivel: this.fb.control(''),
     km_atual: this.fb.control<number | null>(null, { validators: [Validators.min(0)] }),
@@ -57,7 +55,7 @@ export class Veiculo {
     const total = lista.length
     const ativos = lista.filter((item) => item.ativo).length
     const inativos = total - ativos
-    const somaKm = lista.reduce((acc, item) => acc + (typeof item.km_atual === 'number' ? item.km_atual : 0), 0)
+    const somaKm = lista.reduce((acc, item) => acc + (typeof item.km === 'number' ? item.km : 0), 0)
     const mediaKm = total > 0 ? Math.round(somaKm / total) : 0
 
     return [
@@ -142,16 +140,18 @@ export class Veiculo {
     this.successMessage.set(null)
     this.error.set(null)
     this.form.patchValue({
-      cliente_id: veiculo.cliente_id,
-      modelo_id: veiculo.modelo_id,
+      clienteId: veiculo.clienteId,
+      clienteNome: veiculo.clienteNome,
+      modelo_id: veiculo.modeloId,
+      modeloNome: veiculo.modeloNome,
       placa: veiculo.placa,
       renavam: veiculo.renavam,
       chassi: veiculo.chassi,
-      ano_fab: veiculo.ano_fab,
-      ano_mod: veiculo.ano_mod,
+      ano_fab: veiculo.ano_Fab,
+      ano_mod: veiculo.ano_Mod,
       cor: veiculo.cor ?? '',
-      combustivel: veiculo.combustivel ?? '',
-      km_atual: veiculo.km_atual,
+      combustivel: veiculo.combustivel?.toUpperCase() ?? '',
+      km_atual: veiculo.km,
       ativo: veiculo.ativo,
     })
     this.modalOpen.set(true)
@@ -196,7 +196,7 @@ export class Veiculo {
   }
 
   protected getStatusBadge(veiculo: VeVeiculo): string {
-    return veiculo.ativo ? 'badge text-bg-success-subtle' : 'badge text-bg-secondary-subtle'
+    return veiculo.ativo ? 'text-bg-success' : 'text-bg-secondary'
   }
 
   protected clearMessage(): void {
@@ -270,16 +270,16 @@ export class Veiculo {
   private buildPayload(): SaveVeiculoPayload {
     const raw = this.form.value
     return {
-      cliente_id: this.ensureNumber(raw.cliente_id, 'cliente'),
-      modelo_id: this.ensureNumber(raw.modelo_id, 'modelo'),
+      clienteId: this.ensureNumber(raw.clienteId, 'cliente'),
+      modeloId: this.ensureNumber(raw.modelo_id, 'modelo'),
       placa: this.requireText(raw.placa).toUpperCase(),
       renavam: this.requireText(raw.renavam),
       chassi: this.requireText(raw.chassi).toUpperCase(),
-      ano_fab: this.optionalNumber(raw.ano_fab),
-      ano_mod: this.optionalNumber(raw.ano_mod),
+      ano_Fab: this.optionalNumber(raw.ano_fab),
+      ano_Mod: this.optionalNumber(raw.ano_mod),
       cor: this.optionalText(raw.cor),
       combustivel: this.optionalText(raw.combustivel),
-      km_atual: this.optionalNumber(raw.km_atual),
+      km: this.optionalNumber(raw.km_atual),
       ativo: Boolean(raw.ativo),
     }
   }

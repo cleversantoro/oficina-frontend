@@ -1,30 +1,12 @@
 import { MenuItemType } from '@/app/types/layout'
 import {
-  LucideBlocks,
   LucideCalendar,
-  LucideChartNoAxesCombined,
-  LucideChartPie,
-  LucideCommand,
-  LucideCookie,
-  LucideFingerprint,
-  LucideFolderClosed,
   LucideLayoutDashboard,
-  LucideLayoutGrid,
-  LucideMap,
-  LucideMessagesSquare,
-  LucideNotebookText,
-  LucidePaintBucket,
-  LucidePanelLeftDashed,
-  LucidePanelTopDashed,
-  LucidePencilOff,
-  LucidePresentation,
-  LucideRatio,
-  LucideReceiptText,
-  LucideShieldBan,
-  LucideSquarePi,
-  LucideTable2,
-  LucidePencil
+  LucidePencil,
+  Wrench
 } from 'lucide-angular';
+
+//import { LucideAngularModule, Wrench } from 'lucide-angular';
 
 type UserDropdownItemType = {
   label?: string
@@ -93,9 +75,17 @@ export const menuItems: MenuItemType[] = [
     children: [
       { label: 'Clientes', url: '/cliente' },
       { label: 'Profissionais', url: '/profissional' },
-      { label: 'Serviços', url: '/servico' },
       { label: 'Peça', url: '/peca' },
       { label: 'Veiculos', url: '/veiculo' },
+    ]
+  },
+
+  {
+    label: 'Ordem Serviço',
+    icon: Wrench,
+    isCollapsed: true,
+    children: [
+      { label: 'Serviços', url: '/servico' },
     ]
   },
   // {

@@ -61,10 +61,7 @@
                   {{ peca.precoUnitario !== undefined ? (peca.precoUnitario | number: '1.2-2') : '--' }}
                 </td>
                 <td>
-                  <span
-                    class="badge rounded-pill"
-                    [ngClass]="peca.status === 'Ativo' ? 'text-bg-success' : 'text-bg-secondary'"
-                  >
+                  <span class="badge rounded-pill" [ngClass]="peca.status === 'Ativo' ? 'text-bg-success' : 'text-bg-secondary'" >
                     {{ peca.status || 'Indefinido' }}
                   </span>
                 </td>
